@@ -367,10 +367,6 @@ int translate_inst(FILE* output, const char* name, char** args, size_t num_args,
 
    This function is INCOMPLETE. Complete the implementation below. You will
    find bitwise operations to be the cleanest way to complete this function.
-
-   opcode    rs    rt    rd shamt funct
-    31-26 25-21 20-16 15-11  10-6   5-0
-   000000-00000-00000-00000-00000-000000
 */
 int write_rtype(uint8_t funct, FILE* output, char** args, size_t num_args) {
     /* TODO - Error checking */
@@ -378,21 +374,20 @@ int write_rtype(uint8_t funct, FILE* output, char** args, size_t num_args) {
         fprintf(output, "%s\n", "Invalid number of arguments");
         return -1;
     }
-
     int rd, rs, rt;
-    uint32_t instruction = 0;
+    uint32_t inst = 0;
     if (num_args == 3) {
         rd = translate_reg(args[0]);
         rs = translate_reg(args[1]);
         rt = translate_reg(args[2]);
-        instruction = (rs << 21) | (rt << 16) | (rd << 11) | (funct << 0);
+        inst = (rs << 21) | (rt << 16) | (rd << 11) | (funct << 0);
     } else if (num_args == 2) {
         rs = translate_reg(args[0]);
         rt = translate_reg(args[1]);
-        instruction = (rs << 21) | (rt << 16) | (funct << 0);
+        inst = (rs << 21) | (rt << 16) | (funct << 0);
     } else if (num_args == 1) {
         rd = translate_reg(args[0]);
-        instruction = (rd << 11) | (funct << 0);
+        inst = (rd << 11) | (funct << 0);
     }
 
     write_inst_hex(output, instruction);
@@ -405,10 +400,6 @@ int write_rtype(uint8_t funct, FILE* output, char** args, size_t num_args) {
 
    This function is INCOMPLETE. Complete the implementation below. You will
    find bitwise operations to be the cleanest way to complete this function.
-
-   opcode    rs    rt    rd shamt funct
-    31-26 25-21 20-16 15-11  10-6   5-0
-   000000-00000-00000-00000-00000-000000
 */
 int write_shift(uint8_t funct, FILE* output, char** args, size_t num_args) {
     if (num_args != 3) {
@@ -416,34 +407,24 @@ int write_shift(uint8_t funct, FILE* output, char** args, size_t num_args) {
         return -1;
     }
     long int shamt;
-    int rd = translate_reg(args[0]);
-    int rt = translate_reg(args[1]);
-    int err = translate_num(&shamt, args[2], 0, 31);
-
-    if (err == -1) {
+    int rd = translate_reg(args[0]), rt = translate_reg(args[1]), er = translate_num(&shamt, args[2], 0, 31);
+    if (er == -1) {
         return -1;
     }
-    uint32_t instruction = 0;
+    uint32_t inst = 0;
     instruction = (rt << 16) | (rd << 11) | (shamt << 6) | (funct << 0);
-    write_inst_hex(output, instruction);
+    write_inst_hex(output, inst);
     return 0;
 }
-
-/* The rest of your write_*() functions below
-   opcode    rs    rt    rd shamt funct
-    31-26 25-21 20-16 15-11  10-6   5-0
-   000000-00000-00000-00000-00000-000000
-*/
 int write_jr(uint8_t funct, FILE* output, char** args, size_t num_args) {
     if (num_args != 1) {
         fprintf(output, "%s\n", "Invalid number of arguments");
         return -1;
     }
     int rs = translate_reg(args[0]);
-
-    uint32_t instruction = 0;
-    instruction = (rs << 21) | (funct << 0);
-    write_inst_hex(output, instruction);
+    uint32_t inst = 0;
+    inst = (rs << 21) | (funct << 0);
+    write_inst_hex(output, inst);
     return 0;
 }
 
@@ -457,22 +438,15 @@ int write_addiu11(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     if (rt == -1) return -1;
     if (rs == -1) return -1;
     if (err == -1) return -1;
-    /*  opcode + rs + rt + imm */
-    uint32_t instruction = 0;
-    instruction += ((int)opcode << 26);
-    instruction += (rs << 21);
-    instruction += (rt << 16);
+    uint32_t inst = 0;
+    inst += ((int)opcode << 26);
+    inst += (rs << 21);
+    inst += (rt << 16);
     imm = imm & 0x0000ffff;
-    instruction += imm;
-    write_inst_hex(output, instruction);
+    inst += imm;
+    write_inst_hex(output, inst);
     return 0;
 }
-
-
-/* opcode    rs    rt immediate
-    31-26 25-21 20-16 15-0
-   000000-00000-00000-0000000000000000
-*/
 int write_addiu(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     if (num_args != 3) {
         fprintf(output, "%s\n", "Invalid number of arguments");
@@ -494,11 +468,6 @@ int write_addiu(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     write_inst_hex(output, instruction);
     return 0;
 }
-
-/* opcode    rs    rt immediate
-    31-26 25-21 20-16 15-0
-   000000-00000-00000-0000000000000000
-*/
 int write_ori(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     if (num_args != 3) {
         fprintf(output, "%s\n", "Invalid number of arguments");
@@ -533,9 +502,9 @@ int write_lui(uint8_t opcode, FILE* output, char** args, size_t num_args) {
         fprintf(output, "%s\n", "Error in strtol");
         return -1;
     }
-    uint32_t instruction = 0;
-    instruction = (opcode << 26) | (rt << 16) | (imm << 0);
-    write_inst_hex(output, instruction);
+    uint32_t inst = 0;
+    inst = (opcode << 26) | (rt << 16) | (imm << 0);
+    write_inst_hex(output, inst);
     return 0;
 }
 
@@ -547,12 +516,12 @@ int write_mem(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     long int imm;
     int rt = translate_reg(args[0]);
     int rs = translate_reg(args[2]);
-    int err = translate_num(&imm, args[1], INT16_MIN, INT16_MAX);
-    if (err == -1) {
+    int er = translate_num(&imm, args[1], INT16_MIN, INT16_MAX);
+    if (er == -1) {
     }
-    uint32_t instruction = 0;
+    uint32_t inst = 0;
     instruction = (opcode << 26) | (rs << 21) | (rt << 16) | (imm << 0);
-    write_inst_hex(output, instruction);
+    write_inst_hex(output, inst);
     return 0;
 }
 
@@ -572,10 +541,10 @@ int write_branch(uint8_t opcode, FILE* output, char** args, size_t num_args, uin
     int rs = translate_reg(args[0]);
     int rt = translate_reg(args[1]);
     int label_addr = get_addr_for_symbol(symtbl, args[2]);
-    uint32_t instruction = 0;
+    uint32_t inst = 0;
     if (can_branch_to(addr, label_addr)) {
-        instruction = (opcode << 26) | (rs << 21) | (rt << 16) | (label_addr << 0);
-        write_inst_hex(output, instruction);
+        inst = (opcode << 26) | (rs << 21) | (rt << 16) | (label_addr << 0);
+        write_inst_hex(output, inst);
         return 0;
     } else {
         return -1;
@@ -589,9 +558,9 @@ int write_jump(uint8_t opcode, FILE* output, char** args, size_t num_args, uint3
     }
     uint32_t label_addr = get_addr_for_symbol(symtbl, args[0]);
     if (can_branch_to(addr, label_addr)) {
-        uint32_t instruction = 0;
-        instruction = (opcode << 26) | (label_addr << 0);
-        write_inst_hex(output, instruction);
+        uint32_t inst = 0;
+        inst = (opcode << 26) | (label_addr << 0);
+        write_inst_hex(output, inst);
         return 0;
     } else {
         return -1;
