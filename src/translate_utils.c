@@ -116,3 +116,4 @@ int translate_num(long int* output, const char* str, long int lower_bound,
      else if (strcmp(str, "$fp") == 0)   return 30;
      else if (strcmp(str, "$ra") == 0)   return 31;
      else                                return -1;
+}
