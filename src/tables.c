@@ -97,38 +97,37 @@ static char* create_copy_of_str(const char* str) {
    Otherwise, you should store the symbol name and address and return 0.
  */
 int add_to_table(SymbolTable* table, const char* name, uint32_t addr) {
-    /* YOUR CODE HERE */
-	if (addr%4 != 0) {
-		addr_alignment_incorrect();
-	return -1;
-	}
-	char new_name[strlen(name) + 1];
-	strcpy(new_name, name);
-	if((table -> mode) == SYMTBL_UNIQUE_NAME) {
-	  int tbl_size = table -> len;
-	  for (int i = 0; i < tbl_size; i++) {
-			if (strcmp(new_name, ((table -> tbl)[i].name) == 0)) {
-				name_already_exists(name);
-				return -1;
-		  }
+    if(addr % 4 != 0) {
+      addr_alignment_incorrect();
+      return -1;
     }
-	}
-  if (table->len == table-> cap) {
-	  table->cap = (table->cap) * 5;
-	  table->tbl = realloc(table->tbl, (table->cap) * sizeof(Symbol));
-	  uint32_t size_need = strlen(name) +1;
-    table->tbl[(table->len)].name = malloc(size_need * sizeof(char));
-		strcpy(table->tbl[(table->len)].name, new_name);
-		table -> tbl[(table->len)].addr = addr;
-		table -> len = table->len + 1;
-  } else {
-	  uint32_t size_need = strlen(new_name) +1;
-	  table->tbl[(table->len)].name = malloc(size_need * sizeof(char)); 
-	  strcpy(table->tbl[(table->len)].name, new_name);
-	  table->tbl[(table->len)].addr = addr;
-	  table->len = table->len + 1;
-  }
-  return 0;
+    char newName[strlen(name) + 1];
+    strcpy(newName, name);
+    if ( (table -> mode) == SYMTBL_UNIQUE_NAME){
+      int size_table = table -> len;
+      for (int i = 0; i < size_table; i++) {
+        if(strcmp(newName, ((table -> tbl)[i]).name) == 0) {
+          name_already_exists(name);
+          return -1;
+        }
+      }
+    }
+    if(table -> len == table -> cap) {
+      table -> cap = (table -> cap) * 5;
+      table -> tbl = realloc(table->tbl, (table->cap) * sizeof(Symbol));
+      uint32_t new_size_needed = strlen(name) + 1; //Also need to make sure you can add one to a uint32_t
+      table->tbl[(table->len)].name = malloc(new_size_needed * sizeof(char));
+      strcpy(table->tbl[(table->len)].name, newName);
+      table->tbl[(table->len)].addr = addr;
+      table -> len = table->len + 1;      
+    } else {
+        uint32_t new_size_needed = strlen(newName) + 1;
+        table->tbl[(table->len)].name = malloc(new_size_needed * sizeof(char));
+        strcpy(table->tbl[(table->len)].name, newName);
+        table->tbl[(table->len)].addr = addr;
+        table ->len = table -> len + 1;
+    }
+    return 0;
 }
 /* Returns the address (byte offset) of the given symbol. If a symbol with name
    NAME is not present in TABLE, return -1.
