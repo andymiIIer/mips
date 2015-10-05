@@ -463,9 +463,9 @@ int write_addiu(uint8_t opcode, FILE* output, char** args, size_t num_args) {
             return -1;
         }
     }
-    uint32_t instruction = 0;
-    instruction = (opcode << 26) | (rs << 21) | (rt << 16) | (imm << 0);
-    write_inst_hex(output, instruction);
+    uint32_t inst = 0;
+    inst = (opcode << 26) | (rs << 21) | (rt << 16) | (imm << 0);
+    write_inst_hex(output, inst);
     return 0;
 }
 int write_ori(uint8_t opcode, FILE* output, char** args, size_t num_args) {
@@ -484,9 +484,9 @@ int write_ori(uint8_t opcode, FILE* output, char** args, size_t num_args) {
             return -1;
         }
     }
-    uint32_t instruction = 0;
-    instruction = (opcode << 26) | (rs << 21) | (rt << 16) | (imm << 0);
-    write_inst_hex(output, instruction);
+    uint32_t inst = 0;
+    inst = (opcode << 26) | (rs << 21) | (rt << 16) | (imm << 0);
+    write_inst_hex(output, inst);
     return 0;
 }
 
@@ -520,7 +520,7 @@ int write_mem(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     if (er == -1) {
     }
     uint32_t inst = 0;
-    instruction = (opcode << 26) | (rs << 21) | (rt << 16) | (imm << 0);
+    inst = (opcode << 26) | (rs << 21) | (rt << 16) | (imm << 0);
     write_inst_hex(output, inst);
     return 0;
 }
