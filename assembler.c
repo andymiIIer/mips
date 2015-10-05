@@ -129,8 +129,8 @@ static int parse_args(uint32_t input_line, char** args, int* num_args) {
     4. Only one instruction should be present per line. You do not need to do 
         anything extra to detect this - it should be handled by guideline 3. 
     5. A line containing only a label is valid. The address of the label should
-        be the byte offset of the next instruction, regardless of whether there
-        is a next instruction or not.
+        be the byte offset of the next instruction, regardless of whether there                 I CAN'T FIGURE OUT THIS ONE
+        is a next instruction or not.                                                      
 
    Just like in pass_two(), if the function encounters an error it should NOT
    exit, but process the entire file and return -1. If no errors were encountered, 
@@ -152,11 +152,16 @@ int pass_one(FILE* input, FILE* output, SymbolTable* symtbl) {
 
         // Scan for the instruction name
     	char* token = strtok(buf, IGNORE_CHARS);
-
+        if (int err = add_if_label(input_line, token, byte_offset + 4, symtbl)) {
+            token = strtok(buf, IGNORE_CHARS);
+        }
+        if (err) {
+            ret_code = -1;
+        }
         // Scan for arguments
         char* args[MAX_ARGS];
         int num_args = 0;
-
+        parse_args(input_line, args, &num_args);
     	// Checks to see if there were any errors when writing instructions
         unsigned int lines_written = write_pass_one(output, token, args, num_args);
         if (lines_written == 0) {
@@ -179,30 +184,39 @@ int pass_one(FILE* input, FILE* output, SymbolTable* symtbl) {
    the document, and at the end, return -1. Return 0 if no errors were encountered. */
 int pass_two(FILE *input, FILE* output, SymbolTable* symtbl, SymbolTable* reltbl) {
     /* YOUR CODE HERE */
-
+    int err = 0;
     /* Since we pass this buffer to strtok(), the characters in this buffer will
        GET CLOBBERED. */
     char buf[BUF_SIZE];
     // Store input line number / byte offset below. When should each be incremented?
-    int line = 0;
+    uint32_t offset = 0;
     // First, read the next line into a buffer.
-//HERE while (fgets(buf, sizeof(buf), input)) {
+    while (fgets(buf, BUF_SIZE, input)) {
     // Next, use strtok() to scan for next character. If there's nothing,
     // go to the next line.
-    	char* current_line = strtok(buf, IGNORE_CHARS);
+    char* token = strtok(buf, IGNORE_CHARS);
     // Parse for instruction arguments. You should use strtok() to tokenize
     // the rest of the line. Extra arguments should be filtered out in pass_one(),
     // so you don't need to worry about that here.
+    char* line = strtok(buf, "\n");
     char* args[MAX_ARGS];
     int num_args = 0;
-
+    int err1 = parse_args(line, args, &num_args);
     // Use translate_inst() to translate the instruction and write to output file.
     // If an error occurs, the instruction will not be written and you should call
     // raise_inst_error(). 
-
+    int err2 = translate_inst(output, name, args, num_args, offset, symtbl, reltbl);
+    if (err1) {
+        err = -1;
+    }
+    if (err2) {
+        err = -1;
+        raise_inst_error(input_line, token, args, num_args);
+    }
+    offset += 4;
     // Repeat until no more characters are left, and the return the correct return val
-
-    return -1;
+    }
+    return err;
 }
 
 /*******************************
