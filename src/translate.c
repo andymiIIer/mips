@@ -390,7 +390,7 @@ int write_rtype(uint8_t funct, FILE* output, char** args, size_t num_args) {
         inst = (rd << 11) | (funct << 0);
     }
 
-    write_inst_hex(output, instruction);
+    write_inst_hex(output, inst);
     return 0;
 }
 
